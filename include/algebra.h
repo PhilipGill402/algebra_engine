@@ -1,0 +1,6 @@
+#ifndef INCLUDE_ALGEBRA_H_
+#define INCLUDE_ALGEBRA_H_
+
+
+
+#endif // !INCLUDE_ALGEBRA_H_
