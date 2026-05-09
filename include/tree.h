@@ -26,6 +26,6 @@ typedef struct {
     value_t val;
 } node_t;
 
-
+node_t create_tree(parser_t* parser);
 
 #endif
