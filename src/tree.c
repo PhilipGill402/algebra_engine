@@ -44,7 +44,7 @@ static node_t* create_function(token_t token) {
     return node;
 }
 
-static void node_free(node_t* node) {
+void node_free(node_t* node) {
     if (!node) return;
 
     node_free(node->left);
@@ -67,7 +67,7 @@ uint8_t can_be_simplified(node_t* node) {
     } else if (node->type == NODE_FUNCTION) {
         //node->can_be_simplified = 0;
         uint8_t left_simpl = can_be_simplified(node->left);
-        node->can_be_simplified = left_simpl == 0 || left_simpl == 2 ? 0 : 1;
+        node->can_be_simplified = left_simpl == 1 ? 1 : 0;
         return node->can_be_simplified;
     } else if (node->type == NODE_OP) {
         // basic simplification cases (identities and zero multiplication)        
@@ -164,13 +164,14 @@ node_t* create_tree(parser_t* parser) {
 }
 
 static void simplify_function(node_t* node) {
-    if (!node->can_be_simplified)
+    if (!node->can_be_simplified && node->left->type != NODE_CONSTANT)
         return;
     
     double val = 0;
     string_t upper = string_upper(node->val.id);
     node_t* left = node->left;
     if (string_compare_literal(&upper, "LN") == 0) {
+        //printf("%d\n", left->type); 
         val = log(left->val.num);
     }
 
@@ -263,7 +264,7 @@ static void simplify_identity(node_t* node) {
 }
 
 static void simplify_op(node_t* node) {
-    if (!node->can_be_simplified)
+    if (!node->can_be_simplified && (node->left->type != NODE_CONSTANT || node->right->type != NODE_CONSTANT))
         return;
 
     double val = 0;
@@ -273,6 +274,8 @@ static void simplify_op(node_t* node) {
     // simplify identities
     if (left->type != NODE_CONSTANT || right->type != NODE_CONSTANT) {
         simplify_identity(node);
+        print_inorder_tree(node);
+        printf("\n");
         return;
     }
 

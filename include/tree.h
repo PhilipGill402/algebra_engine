@@ -2,7 +2,6 @@
 #define INCLUDE_TREE_H_
 
 #include <stdint.h>
-#include <math.h>
 #include "string_t.h"
 #include "parser.h"
 
@@ -36,7 +35,8 @@ typedef struct {
 
 uint8_t can_be_simplified(node_t* node);
 node_t* create_tree(parser_t* parser);
-void simplify_tree(node_t* root);
 void print_inorder_tree(node_t* node);
+void node_free(node_t* node);
+void simplify_tree(node_t* root);
 
 #endif

@@ -17,10 +17,6 @@ int main() {
     simplify_tree(root);
     print_inorder_tree(root);
     printf("\n");
-    can_be_simplified(root);
-    simplify_tree(root);
-    print_inorder_tree(root);
-    printf("\n");
 
     return 0;
 }
