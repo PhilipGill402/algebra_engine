@@ -9,7 +9,6 @@
 #include "queue.h"
 #include "stack.h"
 #include "vector.h"
-#include "entry.h"
 
 typedef struct {
     queue_t tokens;
@@ -24,8 +23,7 @@ parser_t init_parser();
 void set_expr(const char* expr, parser_t* parser);
 void get_infix(parser_t* parser);
 void get_postfix(parser_t* parser);
-node_t* create_graph(parser_t* parser);
-node_t* parse(parser_t* parser);
+void parse(parser_t* parser);
 void create_var(parser_t* parser, char* name);
 void set_var(parser_t* parser, char* name, double val);
 

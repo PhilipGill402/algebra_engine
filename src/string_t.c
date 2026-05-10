@@ -113,45 +113,20 @@ int string_compare_literal(string_t* a, const char* b) {
     return 0;
 }
 
-string_t string_clone(string_t* str) {
-    string_t new = string_create();
-    new.len = str->len;
-    new.capacity = str->capacity;
+string_t* string_clone(string_t* str) {
+    string_t* new = malloc(sizeof(string_t)); 
+    new->len = str->len;
+    new->capacity = str->capacity;
     
     // we dont wan them to point to the same heap array though
-    new.str = malloc(new.capacity);
-    if (!new.str) {
-        return new;
+    new->str = malloc(new->capacity);
+    if (!new->str) {
+        return NULL;
     }
 
-    memcpy(new.str, str->str, new.len);
+    memcpy(new->str, str->str, new->len);
 
     return new;
-}
-
-vector_t string_tokenize(string_t* str, char a) {
-    vector_t tokens = vector_create(sizeof(string_t));
-    string_t token = string_create();
-
-    for (uint32_t i = 0; i < str->len; i++) {
-        if (str->str[i] == a && token.len > 0) {
-            string_t copy = string_clone(&token);
-            vector_push_back(&tokens, &copy);
-            string_free(&copy);
-            string_clear(&token);
-        }
-        else {
-            string_append_chr(&token, str->str[i]);
-        }  
-    }
-
-    string_t copy = string_clone(&token);
-    vector_push_back(&tokens, &copy);
-    
-    string_free(&copy);
-    string_free(&token);
-
-    return tokens;
 }
 
 char* string_to_literal(string_t* str) {

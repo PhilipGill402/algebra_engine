@@ -31,48 +31,14 @@ int is_right_associative(token_t token) {
     }
 }
 
-double node_sin(node_t* node) {
-    return sin(node->value);
-}
 
-double node_cos(node_t* node) {
-    return cos(node->value);
-}
-
-double node_tan(node_t* node) {
-    return tan(node->value);
-}
-
-double node_sqrt(node_t* node) {
-    return sqrt(node->value);
-}
-
-void backward_sin(node_t* self) {
-    self->left->grad += cos(self->left->value) * self->grad;
-}
-
-void backward_cos(node_t* self) {
-    self->left->grad += -sin(self->left->value) * self->grad;
-}
-
-void backward_tan(node_t* self) {
-    double sec = 1.0 / cos(self->left->value);
-    self->left->grad += sec * sec * self->grad;
-}
-
-void backward_sqrt(node_t* self) {
-    double x = 0.5 / sqrt(self->left->value);
-    self->left->grad += x * self->grad;
-}
 
 /* PARSER */
-parser_t init_parser(arena_t* arena) {
+parser_t init_parser() {
     parser_t parser;
     parser.tokens = create_queue(sizeof(token_t));
     parser.op_stack = create_stack(sizeof(token_t));
     parser.output = create_queue(sizeof(token_t));
-    parser.variables = vector_create(sizeof(entry_t));
-    parser.nodes = vector_create(sizeof(node_t*));
     parser.lexer = NULL;
 
     return parser;
@@ -136,26 +102,19 @@ void get_postfix(parser_t* parser) {
     }
 }
 
-
-
-
 void set_expr(const char* expr, parser_t* parser) {
-    lexer_t* lexer = reserve(sizeof(lexer_t)); 
+    lexer_t* lexer = malloc(sizeof(lexer_t)); 
     *lexer = create_lexer(expr);
 
     parser->lexer = lexer;
 }
 
-node_t* parse(parser_t* parser) {
+void parse(parser_t* parser) {
     get_infix(parser);
     get_postfix(parser);
-
-    node_t* root = create_graph(parser);
-    backprop(root, &parser->nodes);
-
-    return root;
 }
 
+/*
 void create_var(parser_t* parser, char* name) {
     string_t str_name = string_literal(name); 
     create_var_node(&str_name, &parser->variables); 
@@ -165,7 +124,7 @@ void set_var(parser_t* parser, char* name, double val) {
     string_t str_name = string_literal(name);
     
     for (int i = 0; i < parser->variables.size; i++) {
-        entry_t entry = *(entry_t*)get(&parser->variables, i);
+        entry_t entry = *(entry_t*)vector_get(&parser->variables, i);
         if (string_compare(&str_name, &entry.name) == 0) {
             entry.node->value = val;
             return;
@@ -188,4 +147,4 @@ void set_var(parser_t* parser, char* name, double val) {
 
     vector_push_back(&parser->variables, &entry);
 }
-
+*/

@@ -4,18 +4,18 @@
 #include "algebra.h"
 #include "lexer.h"
 #include "token.h"
+#include "parser.h"
 
 int main() {
-    char* equation = "3ln(x+1)-5/x^2";
+    char* equation = "3*ln(x+1)-5/x^2";
     
-    lexer_t lexer = create_lexer(equation);
-    token_t token = get_next_token(&lexer);
+    parser_t parser = init_parser();
+    set_expr(equation, &parser);
+    parse(&parser);
 
-    while (token.type != ENDOFFILE) {
-        print_token(&token);
-        printf("\n");
-        token = get_next_token(&lexer);
-    }
+    node_t* root = create_tree(&parser);
+
+    print_tree(root);
 
     return 0;
 }

@@ -9,25 +9,20 @@ lexer_t create_lexer(const char* expr) {
         .functions = vector_create(sizeof(string_t))
     };
    
-    string_t name = string_literal("SIN");
-    vector_push_back(&lexer.functions, &name);
-    string_free(&name);
+    string_t sin_str = string_literal("SIN");
+    vector_push_back(&lexer.functions, &sin_str);
     
-    name = string_literal("COS");
-    vector_push_back(&lexer.functions, &name);
-    string_free(&name);
+    string_t cos_str = string_literal("COS");
+    vector_push_back(&lexer.functions, &cos_str);
 
-    name = string_literal("TAN");
-    vector_push_back(&lexer.functions, &name);
-    string_free(&name);
+    string_t tan_str = string_literal("TAN");
+    vector_push_back(&lexer.functions, &tan_str);
 
-    name = string_literal("SQRT");
-    vector_push_back(&lexer.functions, &name);
-    string_free(&name);
+    string_t sqrt_str = string_literal("SQRT");
+    vector_push_back(&lexer.functions, &sqrt_str);
 
-    name = string_literal("LN");
-    vector_push_back(&lexer.functions, &name);
-    string_free(&name);
+    string_t ln_str = string_literal("LN");
+    vector_push_back(&lexer.functions, &ln_str);
 
     return lexer;
 }
