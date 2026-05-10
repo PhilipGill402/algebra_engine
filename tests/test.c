@@ -8,14 +8,14 @@
 
 int main() {
     char* equation = "3*ln(x+1)-5/x^2";
-    
+    //char* equation = "3 + 3 * 9\n";
     parser_t parser = init_parser();
     set_expr(equation, &parser);
     parse(&parser);
 
     node_t* root = create_tree(&parser);
-
-    print_tree(root);
+    simplify_tree(root);
+    print_inorder_tree(root);
 
     return 0;
 }
