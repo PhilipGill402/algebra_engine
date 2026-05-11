@@ -170,9 +170,13 @@ static void simplify_function(node_t* node) {
     double val = 0;
     string_t upper = string_upper(node->val.id);
     node_t* left = node->left;
-    if (string_compare_literal(&upper, "LN") == 0) {
-        //printf("%d\n", left->type); 
-        val = log(left->val.num);
+    
+    for (int i = 0; i < functions.size; i++) {
+        function_t* func = (function_t*)vector_get(&functions, i);
+        if (string_compare_literal(&upper, func->name) == 0) {
+            val = func->func(left->val.num);
+            break;
+        }
     }
 
     node_free(node->left);
@@ -336,14 +340,10 @@ void print_inorder_tree(node_t* node) {
         printf(")");
     } else if (node->type == NODE_OP) {
         print_inorder_tree(node->left);
-        printf(" %c ", node->val.op);
+        printf("%c", node->val.op);
         print_inorder_tree(node->right);
     } else {
         printf("unknown");
     }
 }
-
-
-
-
 

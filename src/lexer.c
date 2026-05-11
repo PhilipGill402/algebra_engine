@@ -1,28 +1,50 @@
 #include "lexer.h"
 
+vector_t functions;
+
+double sin_func(double x) {
+    return sin(x);
+}
+
+double cos_func(double x) {
+    return cos(x);
+}
+
+double tan_func(double x) {
+    return tan(x);
+}
+
+double ln_func(double x) {
+    return log(x);
+}
+
+double sqrt_func(double x) {
+    return sqrt(x);
+}
+
+static void functions_init() {
+    functions = vector_create(sizeof(function_t)); 
+    function_t sin_f = { .name = "SIN", .func = sin_func };
+    function_t cos_f = { .name = "COS", .func = cos_func };
+    function_t tan_f = { .name = "TAN", .func = tan_func };
+    function_t ln_f = { .name = "LN", .func = ln_func };
+    function_t sqrt_f = { .name = "SQRT", .func = sqrt_func };
+    vector_push_back(&functions, &sin_f);
+    vector_push_back(&functions, &cos_f);
+    vector_push_back(&functions, &tan_f);
+    vector_push_back(&functions, &ln_f);
+    vector_push_back(&functions, &sqrt_f);
+}
+
 lexer_t create_lexer(const char* expr) {
     lexer_t lexer = {
         .pos = 1,
         .curr_char = expr[0],
         .expr = expr,
-        .len = strlen(expr),
-        .functions = vector_create(sizeof(string_t))
+        .len = strlen(expr)
     };
    
-    string_t sin_str = string_literal("SIN");
-    vector_push_back(&lexer.functions, &sin_str);
-    
-    string_t cos_str = string_literal("COS");
-    vector_push_back(&lexer.functions, &cos_str);
-
-    string_t tan_str = string_literal("TAN");
-    vector_push_back(&lexer.functions, &tan_str);
-
-    string_t sqrt_str = string_literal("SQRT");
-    vector_push_back(&lexer.functions, &sqrt_str);
-
-    string_t ln_str = string_literal("LN");
-    vector_push_back(&lexer.functions, &ln_str);
+    functions_init();
 
     return lexer;
 }
@@ -39,9 +61,10 @@ void advance(lexer_t* lexer) {
 int is_function(lexer_t* lexer, string_t* func) {
     string_t upper_given = string_upper(func); 
 
-    for (int i = 0; i < lexer->functions.size; i++) {
-        string_t function = *(string_t*)vector_get(&lexer->functions, i); 
-        if (string_compare(&upper_given, &function) == 0) {
+    for (int i = 0; i < functions.size; i++) {
+        function_t* func = (function_t*)vector_get(&functions, i);
+        char* function = func->name;
+        if (string_compare_literal(&upper_given, function) == 0) {
             return 1;
         }
     }

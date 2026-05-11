@@ -15,6 +15,7 @@ typedef struct {
     stack_s op_stack;
     queue_t output;
     vector_t variables;
+    vector_t functions;
     vector_t nodes;
     lexer_t* lexer;
 } parser_t;
