@@ -14,7 +14,7 @@ typedef struct {
 } string_t;
 
 string_t string_create();
-string_t string_literal(const char* str);
+string_t* string_literal(const char* str);
 int string_len(string_t* string);
 void string_copy(string_t* dst, string_t* src);
 void string_append_chr(string_t* string, char ch);

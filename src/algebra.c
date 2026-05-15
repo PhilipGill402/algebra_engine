@@ -1,14 +1,143 @@
 #include "algebra.h"
-/*
+
+static node_t* create_constant(double num) {
+    node_t* node = malloc(sizeof(node_t));
+    node->left = NULL;
+    node->right = NULL;
+    node->type = NODE_CONSTANT;
+    node->val.num = num;
+    node->can_be_simplified = 1;
+
+    return node;
+}
+
+static node_t* create_variable(string_t* var) {
+    node_t* node = malloc(sizeof(node_t));
+    node->left = NULL;
+    node->right = NULL;
+    node->type = NODE_VARIABLE;
+    node->val.id = var;
+    node->can_be_simplified = 1;
+
+    return node;
+}
+
+static node_t* create_function(string_t* func) {
+    node_t* node = malloc(sizeof(node_t));
+    node->left = NULL;
+    node->right = NULL;
+    node->type = NODE_FUNCTION;
+    node->val.id = func;
+    node->can_be_simplified = 1;
+
+    return node;
+}
+
+static node_t* create_op(char op) {
+    node_t* node = malloc(sizeof(node_t));
+    node->left = NULL;
+    node->right = NULL;
+    node->type = NODE_OP;
+    node->val.op = op;
+    node->can_be_simplified = 1;
+
+    return node;
+}
+
+uint8_t can_be_simplified(node_t* node) {
+    if (!node) {
+        fprintf(stderr, "unexpected null node\n");
+        return 0;
+    }
+
+    if (node->type == NODE_CONSTANT) {
+        node->can_be_simplified = 1;
+        return 1;
+    } else if (node->type == NODE_VARIABLE) {
+        node->can_be_simplified = 0;
+        return 0;
+    } else if (node->type == NODE_FUNCTION) {
+        //node->can_be_simplified = 0;
+        uint8_t left_simpl = can_be_simplified(node->left);
+        node->can_be_simplified = left_simpl == 1 ? 1 : 0;
+        return node->can_be_simplified;
+    } else if (node->type == NODE_OP) {
+        // basic simplification cases (identities and zero multiplication)        
+        node_t* left = node->left;
+        node_t* right = node->right;
+        
+        // additive identity
+        if (node->val.op == '+') {
+            if (left->type == NODE_CONSTANT && left->val.num == 0) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            } else if (right->type == NODE_CONSTANT && right->val.num == 0) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            }
+
+        }
+        // subtraction identity
+        else if (node->val.op == '-') {
+            if (left->type == NODE_CONSTANT && left->val.num == 0) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            } else if (right->type == NODE_CONSTANT && right->val.num == 0) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            }
+        }
+        // multiplicative identity and multiplication by 0
+        else if (node->val.op == '*') {
+            if (left->type == NODE_CONSTANT && (left->val.num == 1 || left->val.num == 0)) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            } else if (right->type == NODE_CONSTANT && (right->val.num == 1 || right->val.num == 0)) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            }
+        }
+        // division identity
+        else if (node->val.op == '/') {
+            if (left->type == NODE_CONSTANT && left->val.num == 1) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            } else if (right->type == NODE_CONSTANT && right->val.num == 1) {
+                node->can_be_simplified = 2;
+                return node->can_be_simplified;
+            }
+        }
+
+        // else decide based on simplification of child nodes
+        uint8_t left_simpl = can_be_simplified(left);
+        uint8_t right_simpl = can_be_simplified(right);
+
+        node->can_be_simplified = left_simpl <= right_simpl ? left_simpl : right_simpl;
+        
+        return node->can_be_simplified;
+    }
+    
+    fprintf(stderr, "unknown node type: %d\n", node->type);
+    node->can_be_simplified = 0;
+    return 0;
+}
+
 static void simplify_function(node_t* node) {
-    if (!node->can_be_simplified)
+    if (!node->can_be_simplified && node->left->type != NODE_CONSTANT)
         return;
     
     double val = 0;
     string_t upper = string_upper(node->val.id);
     node_t* left = node->left;
-    if (string_compare_literal(&upper, "LN") == 0) {
-        val = log(left->val.num);
+
+    if (left->type != NODE_CONSTANT) return;
+    
+    for (int i = 0; i < functions.size; i++) {
+        function_t* func = (function_t*)vector_get(&functions, i);
+        if (string_compare_literal(&upper, func->name) == 0) {
+            val = func->func(left->val.num);
+            break;
+        }
     }
 
     node_free(node->left);
@@ -26,11 +155,6 @@ static void replace_node_with(node_t* node, node_t* replacement, node_t* discard
 
     replacement->left = NULL;
     replacement->right = NULL;
-    if (replacement->type == NODE_VARIABLE || replacement->type == NODE_FUNCTION) {
-        string_t* copy = string_clone(replacement->val.id);
-        replacement_copy.val.id = copy;
-    }
-
 
     node_free(discard);
     node_free(replacement);
@@ -76,7 +200,7 @@ static void simplify_identity(node_t* node) {
     else if (node->left->type == NODE_CONSTANT && (node->val.op == '-' && node->left->val.num == 0)) {
         var = node->right;
         constant = node->left;
-
+    */
     
     else if (node->left->type == NODE_CONSTANT && (node->val.op == '*' && node->left->val.num == 0)) {
         var = node->right;
@@ -91,7 +215,7 @@ static void simplify_identity(node_t* node) {
         var = node->right;
         constant = node->left;
     }
-
+    */
 
     // handles all identities
     if (node->val.op != '*' || constant->val.num != 0) {
@@ -105,13 +229,13 @@ static void simplify_identity(node_t* node) {
 }
 
 static void simplify_op(node_t* node) {
-    if (!node->can_be_simplified)
+    if (!node->can_be_simplified && (node->left->type != NODE_CONSTANT || node->right->type != NODE_CONSTANT))
         return;
 
     double val = 0;
     node_t* left = node->left;
     node_t* right = node->right;
-    
+
     // simplify identities
     if (left->type != NODE_CONSTANT || right->type != NODE_CONSTANT) {
         simplify_identity(node);
@@ -144,10 +268,20 @@ static void simplify_op(node_t* node) {
 
 void simplify_tree(node_t* root) {
     if (!root) return;
-    printf("%d\n", root->type);
-    
+    printf("%p: ", root);
+
+    if (root->type == NODE_CONSTANT)
+        printf("%d", root->val.num);
+    if (root->type == NODE_OP)
+        printf("%c", root->val.op);
+
+    printf("\n");
+
+
     simplify_tree(root->left);
     simplify_tree(root->right);
+    
+    printf("TYPE: %d\n", root->type);
 
     if (root->type == NODE_CONSTANT) {
         return;
@@ -162,4 +296,143 @@ void simplify_tree(node_t* root) {
     }
 }
 
-*/
+/* DIFFERENTIATING FUNCTIONS */
+
+node_t* diff_constant(node_t* node) {
+    return create_constant(0); 
+}
+
+node_t* diff_var(node_t* node) {
+    return create_constant(1);
+}
+
+node_t* diff_function(node_t* node) {
+    return NULL;
+}
+
+node_t* diff_op(node_t* node) {
+    node_t* op = create_op(node->val.op);
+
+    if (node->val.op == '+') {
+        // f(x) = g(y) + h(z) => f'(x) = g'(y) + h'(z) 
+
+        op->left = diff_tree(node->left);
+        op->right = diff_tree(node->right);
+    } else if (node->val.op == '-') {
+        // f(x) = g(y) + h(z) => f'(x) = g'(y) - h'(z)
+
+        op->left = diff_tree(node->left);
+        op->right = diff_tree(node->right);
+    } else  if (node->val.op == '*') {
+        // f(x) = g(y) * h(z) => f'(x) = g(y) * h'(z) + g'(y) * h(z) 
+
+        op->val.op = '+';
+
+        node_t* left = node_clone(node->left);
+        node_t* right = node_clone(node->right);
+        node_t* left_diff = diff_tree(left);
+        node_t* right_diff = diff_tree(right);
+
+        node_t* left_mult = create_op('*');
+        left_mult->left = left;
+        left_mult->right = right_diff;
+        
+        node_t* right_mult = create_op('*');
+        right_mult->left = left_diff;
+        right_mult->right = right;
+
+        op->left = left_mult;
+        op->right = right_mult;
+
+    } else if (node->val.op == '/') {
+        // f(x) = g(y) / h(z) => f'(x) = (g'(y) * h(z) - g(y) * h'(z)) / h(z) ^ 2
+        
+        node_t* left = node_clone(node->left);
+        node_t* right = node_clone(node->right);
+        node_t* left_diff = diff_tree(left);
+        node_t* right_diff = diff_tree(right);
+        
+        node_t* numerator = create_op('-');
+
+        node_t* left_numerator = create_op('*');
+        left_numerator->left = left_diff;
+        left_numerator->right = right;
+        
+        node_t* right_numerator = create_op('*');
+        right_numerator->left = left;
+        right_numerator->right = right_diff;
+
+        numerator->left = left_numerator;
+        numerator->right = right_numerator;
+        
+        node_t* denominator = create_op('^');
+        denominator->left = right;
+        denominator->right = create_constant(2);
+        
+        op->left = numerator;
+        op->right = denominator;
+    } else if (node->val.op == '^') {
+        // f(x) = g(y) ^ h(z) => g(y) ^ h(z) * (h'(z) * ln(g(y)) + (h(z) * g'(y)) / g(y))
+        op->val.op = '*'; 
+        node_t* left = node_clone(node->left);
+        node_t* right = node_clone(node->right);
+        node_t* left_diff = diff_tree(left);
+        node_t* right_diff = diff_tree(right);
+
+        node_t* left_op = create_op('^');
+        left_op->left = left;
+        left_op->right = right;
+
+        node_t* right_op = create_op('+');
+        
+        node_t* right_op_left = create_op('*');
+        
+        string_t* ln_str = string_literal("ln");
+        node_t* ln_node = create_function(ln_str);
+        ln_node->left = left;
+    
+        right_op_left->left = right_diff;
+        right_op_left->right = ln_node;
+
+        node_t* right_op_right = create_op('/');
+
+        node_t* right_op_right_numerator = create_op('*');
+        right_op_right_numerator->left = right;
+        right_op_right_numerator->right = left_diff;
+
+        node_t* right_op_right_denominator = left;
+
+        right_op_right->left = right_op_right_numerator;
+        right_op_right->right = right_op_right_denominator;
+
+        right_op->left = right_op_left;
+        right_op->right = right_op_right;
+        
+        op->left = left_op;
+        op->right = right_op;
+    } else {
+        op = NULL; 
+        fprintf(stderr, "unknown operator\n");
+    } 
+
+    return op;
+}
+
+node_t* diff_tree(node_t* root) {
+    if (!root) return NULL;
+    node_t* new_root;
+
+    if (root->type == NODE_CONSTANT) {
+        new_root = diff_constant(root);  
+    } else if (root->type == NODE_VARIABLE) {
+        new_root = diff_var(root); 
+    } else if (root->type == NODE_FUNCTION) {
+        new_root = diff_function(root);
+    } else if (root->type == NODE_OP) {
+        new_root = diff_op(root);
+    }
+
+    return new_root;
+}
+
+

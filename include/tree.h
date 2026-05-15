@@ -39,6 +39,7 @@ uint8_t can_be_simplified(node_t* node);
 node_t* create_tree(parser_t* parser);
 void print_inorder_tree(node_t* node);
 void node_free(node_t* node);
-void simplify_tree(node_t* root);
+node_t* node_clone(node_t* node);
+//void simplify_tree(node_t* root);
 
 #endif

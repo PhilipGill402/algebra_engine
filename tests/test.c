@@ -7,16 +7,23 @@
 #include "parser.h"
 
 int main() {
-    char* equation = "3*ln(1*9)-5/x^2";
+    char* equation = "x^2";
     //char* equation = "3 + 3 * 9\n";
     parser_t parser = init_parser();
     set_expr(equation, &parser);
     parse(&parser);
 
     node_t* root = create_tree(&parser);
-    simplify_tree(root);
+    //simplify_tree(root);
+    printf("f(x) = "); 
     print_inorder_tree(root);
     printf("\n");
-
+    node_t* diff = diff_tree(root);
+    can_be_simplified(diff);
+    simplify_tree(diff);
+    printf("f'(x) = ");
+    print_inorder_tree(diff);
+    printf("\n");
+    
     return 0;
 }
