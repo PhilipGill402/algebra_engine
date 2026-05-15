@@ -170,7 +170,7 @@ static void replace_node_with_constant(node_t* node, double value) {
     node->right = NULL;
     node->type = NODE_CONSTANT;
     node->val.num = value;
-    node->can_be_simplified = 0;
+    node->can_be_simplified = 1;
 }
 
 static void simplify_identity(node_t* node) { 
@@ -268,21 +268,12 @@ static void simplify_op(node_t* node) {
 
 void simplify_tree(node_t* root) {
     if (!root) return;
-    printf("%p: ", root);
-
-    if (root->type == NODE_CONSTANT)
-        printf("%d", root->val.num);
-    if (root->type == NODE_OP)
-        printf("%c", root->val.op);
-
-    printf("\n");
-
 
     simplify_tree(root->left);
     simplify_tree(root->right);
-    
-    printf("TYPE: %d\n", root->type);
 
+    can_be_simplified(root);
+    
     if (root->type == NODE_CONSTANT) {
         return;
     } else if (root->type == NODE_VARIABLE) {
@@ -334,12 +325,12 @@ node_t* diff_op(node_t* node) {
         node_t* right_diff = diff_tree(right);
 
         node_t* left_mult = create_op('*');
-        left_mult->left = left;
-        left_mult->right = right_diff;
+        left_mult->left = node_clone(left);
+        left_mult->right = node_clone(right_diff);
         
         node_t* right_mult = create_op('*');
-        right_mult->left = left_diff;
-        right_mult->right = right;
+        right_mult->left = node_clone(left_diff);
+        right_mult->right = node_clone(right);
 
         op->left = left_mult;
         op->right = right_mult;
@@ -355,18 +346,18 @@ node_t* diff_op(node_t* node) {
         node_t* numerator = create_op('-');
 
         node_t* left_numerator = create_op('*');
-        left_numerator->left = left_diff;
-        left_numerator->right = right;
+        left_numerator->left = node_clone(left_diff);
+        left_numerator->right = node_clone(right);
         
         node_t* right_numerator = create_op('*');
-        right_numerator->left = left;
-        right_numerator->right = right_diff;
+        right_numerator->left = node_clone(left);
+        right_numerator->right = node_clone(right_diff);
 
         numerator->left = left_numerator;
         numerator->right = right_numerator;
         
         node_t* denominator = create_op('^');
-        denominator->left = right;
+        denominator->left = node_clone(right);
         denominator->right = create_constant(2);
         
         op->left = numerator;
@@ -380,8 +371,8 @@ node_t* diff_op(node_t* node) {
         node_t* right_diff = diff_tree(right);
 
         node_t* left_op = create_op('^');
-        left_op->left = left;
-        left_op->right = right;
+        left_op->left = node_clone(left);
+        left_op->right = node_clone(right);
 
         node_t* right_op = create_op('+');
         
@@ -389,18 +380,18 @@ node_t* diff_op(node_t* node) {
         
         string_t* ln_str = string_literal("ln");
         node_t* ln_node = create_function(ln_str);
-        ln_node->left = left;
+        ln_node->left = node_clone(left);
     
-        right_op_left->left = right_diff;
+        right_op_left->left = node_clone(right_diff);
         right_op_left->right = ln_node;
 
         node_t* right_op_right = create_op('/');
 
         node_t* right_op_right_numerator = create_op('*');
-        right_op_right_numerator->left = right;
-        right_op_right_numerator->right = left_diff;
+        right_op_right_numerator->left = node_clone(right);
+        right_op_right_numerator->right = node_clone(left_diff);
 
-        node_t* right_op_right_denominator = left;
+        node_t* right_op_right_denominator = node_clone(left);
 
         right_op_right->left = right_op_right_numerator;
         right_op_right->right = right_op_right_denominator;
