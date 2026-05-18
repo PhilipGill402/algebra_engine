@@ -19,7 +19,6 @@ int main() {
     print_inorder_tree(root);
     printf("\n");
     node_t* diff = diff_tree(root);
-    can_be_simplified(diff);
     simplify_tree(diff);
     printf("f'(x) = ");
     print_inorder_tree(diff);

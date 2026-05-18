@@ -301,7 +301,7 @@ node_t* diff_op(node_t* node) {
 
         node_t* left_numerator = create_op('*');
         left_numerator->left = node_clone(left_diff);
-        left_numerator->right = node_clone(right);
+        left_numerator->right = node_clone(node->right);
         
         node_t* right_numerator = create_op('*');
         right_numerator->left = node_clone(left);
@@ -311,7 +311,7 @@ node_t* diff_op(node_t* node) {
         numerator->right = right_numerator;
         
         node_t* denominator = create_op('^');
-        denominator->left = node_clone(right);
+        denominator->left = node_clone(node->right);
         denominator->right = create_constant(2);
         
         op->left = numerator;

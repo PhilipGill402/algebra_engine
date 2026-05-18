@@ -39,7 +39,7 @@ void print_inorder_tree(node_t* node) {
     if (!node) return;
 
     if (node->type == NODE_CONSTANT) {
-        printf("%f", node->val.num);
+        printf("%.01f", node->val.num);
     } else if (node->type == NODE_VARIABLE) {
         string_print(node->val.id, 1);
     } else if (node->type == NODE_FUNCTION) {
