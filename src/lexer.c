@@ -1,40 +1,6 @@
 #include "lexer.h"
 
-vector_t functions;
 
-double sin_func(double x) {
-    return sin(x);
-}
-
-double cos_func(double x) {
-    return cos(x);
-}
-
-double tan_func(double x) {
-    return tan(x);
-}
-
-double ln_func(double x) {
-    return log(x);
-}
-
-double sqrt_func(double x) {
-    return sqrt(x);
-}
-
-static void functions_init() {
-    functions = vector_create(sizeof(function_t)); 
-    function_t sin_f = { .name = "SIN", .func = sin_func };
-    function_t cos_f = { .name = "COS", .func = cos_func };
-    function_t tan_f = { .name = "TAN", .func = tan_func };
-    function_t ln_f = { .name = "LN", .func = ln_func };
-    function_t sqrt_f = { .name = "SQRT", .func = sqrt_func };
-    vector_push_back(&functions, &sin_f);
-    vector_push_back(&functions, &cos_f);
-    vector_push_back(&functions, &tan_f);
-    vector_push_back(&functions, &ln_f);
-    vector_push_back(&functions, &sqrt_f);
-}
 
 lexer_t create_lexer(const char* expr) {
     lexer_t lexer = {

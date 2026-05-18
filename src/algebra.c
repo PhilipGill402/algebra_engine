@@ -1,49 +1,5 @@
 #include "algebra.h"
 
-static node_t* create_constant(double num) {
-    node_t* node = malloc(sizeof(node_t));
-    node->left = NULL;
-    node->right = NULL;
-    node->type = NODE_CONSTANT;
-    node->val.num = num;
-    node->can_be_simplified = 1;
-
-    return node;
-}
-
-static node_t* create_variable(string_t* var) {
-    node_t* node = malloc(sizeof(node_t));
-    node->left = NULL;
-    node->right = NULL;
-    node->type = NODE_VARIABLE;
-    node->val.id = var;
-    node->can_be_simplified = 1;
-
-    return node;
-}
-
-static node_t* create_function(string_t* func) {
-    node_t* node = malloc(sizeof(node_t));
-    node->left = NULL;
-    node->right = NULL;
-    node->type = NODE_FUNCTION;
-    node->val.id = func;
-    node->can_be_simplified = 1;
-
-    return node;
-}
-
-static node_t* create_op(char op) {
-    node_t* node = malloc(sizeof(node_t));
-    node->left = NULL;
-    node->right = NULL;
-    node->type = NODE_OP;
-    node->val.op = op;
-    node->can_be_simplified = 1;
-
-    return node;
-}
-
 uint8_t can_be_simplified(node_t* node) {
     if (!node) {
         fprintf(stderr, "unexpected null node\n");
@@ -80,7 +36,8 @@ uint8_t can_be_simplified(node_t* node) {
         // subtraction identity
         else if (node->val.op == '-') {
             if (left->type == NODE_CONSTANT && left->val.num == 0) {
-                node->can_be_simplified = 2;
+                // NOT AN IDENTITY 
+                node->can_be_simplified = 0;
                 return node->can_be_simplified;
             } else if (right->type == NODE_CONSTANT && right->val.num == 0) {
                 node->can_be_simplified = 2;
@@ -100,7 +57,8 @@ uint8_t can_be_simplified(node_t* node) {
         // division identity
         else if (node->val.op == '/') {
             if (left->type == NODE_CONSTANT && left->val.num == 1) {
-                node->can_be_simplified = 2;
+                // NOT AN IDENTITY 
+                node->can_be_simplified = 0;
                 return node->can_be_simplified;
             } else if (right->type == NODE_CONSTANT && right->val.num == 1) {
                 node->can_be_simplified = 2;
@@ -155,7 +113,7 @@ static void replace_node_with(node_t* node, node_t* replacement, node_t* discard
 
     replacement->left = NULL;
     replacement->right = NULL;
-
+    
     node_free(discard);
     node_free(replacement);
 
@@ -216,7 +174,7 @@ static void simplify_identity(node_t* node) {
         constant = node->left;
     }
     */
-
+    
     // handles all identities
     if (node->val.op != '*' || constant->val.num != 0) {
         // swap the op and variable node then destroy
@@ -295,10 +253,6 @@ node_t* diff_constant(node_t* node) {
 
 node_t* diff_var(node_t* node) {
     return create_constant(1);
-}
-
-node_t* diff_function(node_t* node) {
-    return NULL;
 }
 
 node_t* diff_op(node_t* node) {
@@ -409,9 +363,32 @@ node_t* diff_op(node_t* node) {
     return op;
 }
 
+node_t* diff_function(node_t* node) {
+    node_t* func_diff = NULL;
+    node_t* root = create_op('*');
+    string_t upper = string_upper(node->val.id);
+    node_t* left = node->left;
+    
+    root->right = diff_tree(left);
+    
+    for (int i = 0; i < functions.size; i++) {
+        function_t* func = (function_t*)vector_get(&functions, i);
+        if (string_compare_literal(&upper, func->name) == 0) {
+            func_diff = func->diff(node);
+            print_inorder_tree(func_diff);
+            printf("\n");
+            break;
+        }
+    }
+
+    root->left = func_diff;
+
+    return root;
+}
+
 node_t* diff_tree(node_t* root) {
     if (!root) return NULL;
-    node_t* new_root;
+    node_t* new_root = NULL;
 
     if (root->type == NODE_CONSTANT) {
         new_root = diff_constant(root);  
