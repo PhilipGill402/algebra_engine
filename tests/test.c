@@ -7,7 +7,7 @@
 #include "parser.h"
 
 int main() {
-    char* equation = "0-x";
+    char* equation = "1/sqrt(x)";
     //char* equation = "3 + 3 * 9\n";
     parser_t parser = init_parser();
     set_expr(equation, &parser);

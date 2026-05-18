@@ -375,8 +375,6 @@ node_t* diff_function(node_t* node) {
         function_t* func = (function_t*)vector_get(&functions, i);
         if (string_compare_literal(&upper, func->name) == 0) {
             func_diff = func->diff(node);
-            print_inorder_tree(func_diff);
-            printf("\n");
             break;
         }
     }

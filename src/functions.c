@@ -35,7 +35,7 @@ node_t* diff_cos(node_t* self) {
     node->right = create_function(string_literal("sin"));
     node->right->left = node_clone(self->left);
     node->left = create_constant(0);
-    //node_free(self);
+    node_free(self);
 
     return node;
 }
@@ -44,7 +44,20 @@ node_t* diff_ln(node_t* self) {
     node_t* node = create_op('/');
     node->left = create_constant(1);
     node->right = node_clone(self->left);
-    //node_free(self);
+    node_free(self);
+
+    return node;
+}
+
+node_t* diff_sqrt(node_t* self) {
+    node_t* node = create_op('/');
+    node->left = create_constant(1);
+    node->right = create_op('*');
+    node->right->left = create_constant(2);
+    node->right->right = create_function(string_literal("sqrt"));
+    node->right->right->left = node_clone(self->left);
+    
+    node_free(self);
 
     return node;
 }
@@ -55,7 +68,7 @@ void functions_init() {
     function_t cos_f = { .name = "COS", .func = cos_func, .diff = diff_cos };
     function_t tan_f = { .name = "TAN", .func = tan_func };
     function_t ln_f = { .name = "LN", .func = ln_func, .diff = diff_ln  };
-    function_t sqrt_f = { .name = "SQRT", .func = sqrt_func };
+    function_t sqrt_f = { .name = "SQRT", .func = sqrt_func, .diff = diff_sqrt };
     vector_push_back(&functions, &sin_f);
     vector_push_back(&functions, &cos_f);
     vector_push_back(&functions, &tan_f);
